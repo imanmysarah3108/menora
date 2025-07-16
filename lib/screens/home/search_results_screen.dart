@@ -263,7 +263,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                 child: Chip(
                   label: Text('Genre: $_currentGenre'),
                   backgroundColor: AppColors.lightBlue,
-                  labelStyle: const TextStyle(color: AppColors.darkBlue),
+                  labelStyle: const TextStyle(color: AppColors.white),
                   deleteIcon: const Icon(Icons.close, size: 18),
                   onDeleted: () {
                     setState(() {
@@ -328,7 +328,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: ActionChip(
         label: Text(genre),
-        backgroundColor: AppColors.lightBlue,
+        backgroundColor: const Color.fromARGB(255, 198, 221, 244),
         labelStyle: const TextStyle(color: AppColors.darkBlue),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),

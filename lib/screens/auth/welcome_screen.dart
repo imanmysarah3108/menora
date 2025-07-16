@@ -35,8 +35,8 @@ class WelcomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 40),
               // Placeholder for the book image
-              Image.network(
-                'https://placehold.co/200x200/BBDEFB/1E88E5?text=Books',
+              Image.asset(
+                'menoralogo.png',
                 height: 200,
                 width: 200,
                 fit: BoxFit.contain,

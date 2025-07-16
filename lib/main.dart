@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Book Reader App',
       theme: AppTheme.lightTheme.copyWith(
-        textTheme: GoogleFonts.interTextTheme(
+        textTheme: GoogleFonts.merriweatherTextTheme(
           Theme.of(context).textTheme,
         ),
       ),

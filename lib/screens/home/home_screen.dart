@@ -8,6 +8,8 @@ import '../../widgets/book_card.dart';
 import '../../services/supabase_service.dart';
 import '../../models/book.dart';
 import '../auth/login_screen.dart'; // To access CurrentUser
+import 'dart:math';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -128,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     borderRadius: BorderRadius.circular(8.0),
                                     image: DecorationImage(
                                       image: NetworkImage(
-                                        'https://placehold.co/120x180/BBDEFB/1E88E5?text=${ebook.title.substring(0, 1)}',
+                                        'https://picsum.photos/seed/${Random().nextInt(1000)}/200/300',
                                       ),
                                       fit: BoxFit.cover,
                                       onError: (exception, stackTrace) {

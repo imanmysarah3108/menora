@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import '../models/book.dart';
 import '../constants/app_colors.dart';
+import 'dart:math';
+
 
 class BookCard extends StatelessWidget {
   final Ebook ebook;
@@ -43,7 +45,7 @@ class BookCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.0),
                   image: DecorationImage(
                     image: NetworkImage(
-                      'https://placehold.co/80x120/BBDEFB/1E88E5?text=${ebook.title.substring(0, 1)}',
+                      'https://picsum.photos/seed/${Random().nextInt(1000)}/200/300',
                     ),
                     fit: BoxFit.cover,
                     onError: (exception, stackTrace) {

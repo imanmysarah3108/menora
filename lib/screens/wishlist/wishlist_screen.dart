@@ -7,6 +7,7 @@ import '../../services/supabase_service.dart';
 import '../../widgets/bottom_nav_bar.dart';
 import '../auth/login_screen.dart'; // To access CurrentUser
 import '../../utils/app_router.dart';
+
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
 
@@ -17,7 +18,7 @@ class WishlistScreen extends StatefulWidget {
 extension StringExtension on String {
   String capitalize() {
     if (isEmpty) return this;
-    return '${this[0].toUpperCase()}${substring(1)}';
+    return this[0].toUpperCase() + substring(1);
   }
 }
 
@@ -83,92 +84,112 @@ class _WishlistScreenState extends State<WishlistScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.primaryBlue,
-        // Removed leading IconButton
         title: const Text(
           'My Wishlist',
           style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
-        // Removed actions IconButton
         elevation: 0,
       ),
-      body: RefreshIndicator(
-        onRefresh: _fetchWishlist,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _wishlistItems.isEmpty
-                ? const Center(
-                    child: Text(
-                      'Your wishlist is empty.',
-                      style: TextStyle(fontSize: 18, color: AppColors.greyText),
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16.0),
-                    itemCount: _wishlistItems.length,
-                    itemBuilder: (context, index) {
-                      final item = _wishlistItems[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 8.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        elevation: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column( // Use Column to stack the list and the ad banner
+        children: [
+          Expanded( // Expanded to allow the ListView to take available space
+            child: RefreshIndicator(
+              onRefresh: _fetchWishlist,
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _wishlistItems.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Your wishlist is empty.',
+                            style: TextStyle(fontSize: 18, color: AppColors.greyText),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(16.0),
+                          itemCount: _wishlistItems.length,
+                          itemBuilder: (context, index) {
+                            final item = _wishlistItems[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(vertical: 8.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              elevation: 2,
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
                                   children: [
-                                    Text(
-                                      item.bookTitle,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item.bookTitle,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          if (item.bookAuthor != null && item.bookAuthor!.isNotEmpty)
+                                            Text(
+                                              item.bookAuthor!,
+                                              style: const TextStyle(
+                                                color: AppColors.greyText,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          const SizedBox(height: 5),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: item.status == BookStatus.available
+                                                  ? AppColors.green.withOpacity(0.2)
+                                                  : AppColors.red.withOpacity(0.2),
+                                              borderRadius: BorderRadius.circular(5),
+                                            ),
+                                            child: Text(
+                                              item.status.value.capitalize(),
+                                              style: TextStyle(
+                                                color: item.status == BookStatus.available
+                                                    ? AppColors.green
+                                                    : AppColors.red,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    if (item.bookAuthor != null && item.bookAuthor!.isNotEmpty)
-                                      Text(
-                                        item.bookAuthor!,
-                                        style: const TextStyle(
-                                          color: AppColors.greyText,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    const SizedBox(height: 5),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: item.status == BookStatus.available
-                                            ? AppColors.green.withOpacity(0.2)
-                                            : AppColors.red.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(5),
-                                      ),
-                                      child: Text(
-                                        item.status.value.capitalize(),
-                                        style: TextStyle(
-                                          color: item.status == BookStatus.available
-                                              ? AppColors.green
-                                              : AppColors.red,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                      ),
+                                    IconButton(
+                                      icon: const Icon(Icons.close, color: AppColors.red),
+                                      onPressed: () => _removeWishlistItem(item.id),
                                     ),
                                   ],
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.close, color: AppColors.red),
-                                onPressed: () => _removeWishlistItem(item.id),
-                              ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
+            ),
+          ),
+          // Mockup Banner Ad Area
+          Container(
+            height: 70.0, // Standard banner ad height (e.g., 50 or 100)
+            width: double.infinity, // Take full width
+            color: AppColors.lightGrey, // A neutral background for the ad
+            alignment: Alignment.center,
+            margin: const EdgeInsets.only(top: 8.0), // Some space from the list items
+            child: const Text(
+              'Mockup Banner Ad',
+              style: TextStyle(
+                color: AppColors.greyText,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 2),
     );

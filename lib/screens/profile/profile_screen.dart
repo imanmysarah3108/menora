@@ -9,6 +9,8 @@ import '../../widgets/bottom_nav_bar.dart';
 import '../../utils/app_router.dart';
 import '../auth/login_screen.dart'; // To access CurrentUser
 import '../auth/welcome_screen.dart'; // For logout navigation
+import 'dart:math';
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -224,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             borderRadius: BorderRadius.circular(8.0),
                                             image: DecorationImage(
                                               image: NetworkImage(
-                                                'https://placehold.co/60x90/BBDEFB/1E88E5?text=${ebook.title.substring(0, 1)}',
+                                                'https://picsum.photos/seed/${Random().nextInt(1000)}/200/300',
                                               ),
                                               fit: BoxFit.cover,
                                               onError: (exception, stackTrace) {

@@ -10,6 +10,7 @@ import '../../widgets/bottom_nav_bar.dart';
 import '../../widgets/rating_stars.dart';
 import '../../utils/app_router.dart';
 import '../auth/login_screen.dart'; // To access CurrentUser
+import 'dart:math';
 
 class BookDetailScreen extends StatefulWidget {
   final Ebook ebook;
@@ -140,7 +141,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     borderRadius: BorderRadius.circular(10.0),
                     image: DecorationImage(
                       image: NetworkImage(
-                        'https://placehold.co/150x220/BBDEFB/1E88E5?text=${widget.ebook.title.substring(0, 1)}',
+                        'https://picsum.photos/seed/${Random().nextInt(1000)}/200/300',
                       ),
                       fit: BoxFit.cover,
                       onError: (exception, stackTrace) {
