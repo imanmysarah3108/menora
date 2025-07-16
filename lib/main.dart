@@ -18,8 +18,8 @@ void main() async {
 
   // Initialize Supabase
   // Replace with your actual Supabase URL and Anon Key
-  const String supabaseUrl = 'YOUR_SUPABASE_URL';
-  const String supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
+  const String supabaseUrl = 'https://gnjjqhchzmcwhoelugen.supabase.co';
+  const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImduampxaGNoem1jd2hvZWx1Z2VuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MTM1MDAsImV4cCI6MjA2Nzk4OTUwMH0.U9fzz-njmirRZBGhYmdxj9gPWvIS_srS6vvBf2_5g20';
 
   await Supabase.initialize(
     url: supabaseUrl,
