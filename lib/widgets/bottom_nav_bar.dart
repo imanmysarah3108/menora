@@ -18,9 +18,7 @@ class BottomNavBar extends StatelessWidget {
             Navigator.pushReplacementNamed(context, AppRouter.homeRoute);
             break;
           case 1:
-          // Search is usually handled within the home screen or a dedicated search screen
-          // For now, it will lead to the home screen.
-            Navigator.pushReplacementNamed(context, AppRouter.homeRoute);
+            Navigator.pushReplacementNamed(context, AppRouter.searchResultsRoute); // Changed to searchResultsRoute
             break;
           case 2:
             Navigator.pushReplacementNamed(context, AppRouter.wishlistRoute);

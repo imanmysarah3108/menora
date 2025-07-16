@@ -68,9 +68,11 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         SnackBar(content: Text('Error loading details: ${e.toString()}')),
       );
     } finally {
-      setState(() {
-        _isLoadingReviews = false;
-      });
+      if (mounted) { // Check mounted before calling setState
+        setState(() {
+          _isLoadingReviews = false;
+        });
+      }
     }
   }
 
@@ -93,13 +95,17 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           const SnackBar(content: Text('Book added to collection!')),
         );
       }
-      setState(() {
-        _isInCollection = !_isInCollection;
-      });
+      if (mounted) { // Check mounted before calling setState
+        setState(() {
+          _isInCollection = !_isInCollection;
+        });
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update collection: ${e.toString().replaceFirst('Exception: ', '')}')),
-      );
+      if (mounted) { // Check mounted before showing SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update collection: ${e.toString().replaceFirst('Exception: ', '')}')),
+        );
+      }
     }
   }
 
@@ -201,7 +207,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Dr. Iman Syahirah seorang wanita berdikari dan berkerjaya; selalu tahu apa yang dimahukan dalam hidupnya. Namun, tiada siapa tahu, doktor yang kelihatan tegas ini menyimpan kisah silam yang dijaga rapi. Dia sendiri tidak ingin mengenang lagi. Walau bagaimanapun, pertemuan dengan Aleph telah menimbulkan kembali gelodak perasaan lama yang disangka telah terhapus sepenuhnya. Lamunan Faris secara tiba-tiba meniembusi memori Iman jalan keluar daripada kemelut tersebut.',
+                'Dr. Iman Syahirah seorang wanita berdikari dan berkeyakinan tinggi; selalu tahu apa yang dimahukan dalam hidupnya. Namun, tiada siapa tahu, doktor yang kelihatan tegas ini menyimpan kisah silam yang dijaga rapi. Dia sendiri tidak ingin mengenang lagi. Walau bagaimanapun, pertemuan dengan Aleph telah menimbulkan kembali gelodak perasaan lama yang disangka telah terhapus sepenuhnya. Lamunan Faris secara tiba-tiba meniembusi memori Iman jalan keluar daripada kemelut tersebut.',
                 style: const TextStyle(fontSize: 15, color: AppColors.greyText),
                 textAlign: TextAlign.justify,
               ),
@@ -246,76 +252,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 ],
               ),
               const SizedBox(height: 30),
-              const Text(
-                'User Review',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.darkBlue,
-                ),
-              ),
-              const SizedBox(height: 10),
-              _isLoadingReviews
-                  ? const Center(child: CircularProgressIndicator())
-                  : _reviews.isEmpty
-                      ? const Text('No reviews yet. Be the first to review!')
-                      : ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _reviews.length,
-                          itemBuilder: (context, index) {
-                            final review = _reviews[index];
-                            return Card(
-                              margin: const EdgeInsets.symmetric(vertical: 8.0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              elevation: 2,
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        // Placeholder for user profile image
-                                        CircleAvatar(
-                                          radius: 20,
-                                          backgroundColor: AppColors.lightBlue,
-                                          child: Text(
-                                            review.user?.name?.substring(0, 1).toUpperCase() ?? '?',
-                                            style: const TextStyle(color: AppColors.darkBlue),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              review.user?.name ?? 'Anonymous',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            RatingStarsDisplay(rating: review.rating),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      review.comment ?? 'No comment provided.',
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-              const SizedBox(height: 20),
-              // Reading Progress Section
+              // Reading Progress Section - Moved above User Review
               const Text(
                 'Reading Progress',
                 style: TextStyle(
@@ -370,6 +307,76 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                       ),
                     )
                   : const Text('No reading progress recorded for this book.'),
+              const SizedBox(height: 20),
+              // User Review Section - Now at the bottom
+              const Text(
+                'User Review',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkBlue,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _isLoadingReviews
+                  ? const Center(child: CircularProgressIndicator())
+                  : _reviews.isEmpty
+                      ? const Text('No reviews yet. Be the first to review!')
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _reviews.length,
+                          itemBuilder: (context, index) {
+                            final review = _reviews[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(vertical: 8.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              elevation: 2,
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        // Placeholder for user profile image
+                                        CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: AppColors.lightBlue,
+                                          child: Text(
+                                            review.user?.name?.substring(0, 1).toUpperCase() ?? '?',
+                                            style: const TextStyle(color: AppColors.darkBlue),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              review.user?.name ?? 'Anonymous', // Fallback to 'Anonymous' if name is null
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                            RatingStarsDisplay(rating: review.rating),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      review.comment ?? 'No comment provided.',
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
             ],
           ),
         ),
@@ -387,7 +394,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
     await showDialog(
       context: context, // 'context' is now safe to use here
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) { // Changed parameter name to dialogContext
         return AlertDialog(
           title: const Text('Update Reading Progress'),
           content: Column(
@@ -421,7 +428,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             TextButton(
               child: const Text('Cancel'),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop(); // Use dialogContext
               },
             ),
             ElevatedButton(
@@ -430,40 +437,40 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 if (newPage != null && newStatus != null) {
                   if (newPage! > (widget.ebook.pageNumber ?? 999999)) {
                     // Check if the dialog context is still valid before showing SnackBar
-                    if (Navigator.of(context).mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                    if (Navigator.of(dialogContext).mounted) { // Use dialogContext
+                      ScaffoldMessenger.of(dialogContext).showSnackBar( // Use dialogContext
                         const SnackBar(content: Text('Current page cannot exceed total pages.'), backgroundColor: Colors.red),
                       );
                     }
                     return;
                   }
                   try {
-                    await Provider.of<SupabaseService>(context, listen: false).updateReadingProgress(
+                    await Provider.of<SupabaseService>(dialogContext, listen: false).updateReadingProgress( // Use dialogContext
                       userId: _userId!,
                       bookId: widget.ebook.ebookId,
                       currentPage: newPage!,
                       status: newStatus!,
                     );
                     // Check if the dialog context is still valid before showing SnackBar
-                    if (Navigator.of(context).mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                    if (Navigator.of(dialogContext).mounted) { // Use dialogContext
+                      ScaffoldMessenger.of(dialogContext).showSnackBar( // Use dialogContext
                         const SnackBar(content: Text('Reading progress updated!'), backgroundColor: Colors.green),
                       );
                     }
-                    Navigator.of(context).pop();
+                    Navigator.of(dialogContext).pop(); // Use dialogContext
                     _fetchBookDetails(); // Refresh details
                   } catch (e) {
                     // Check if the dialog context is still valid before showing SnackBar
-                    if (Navigator.of(context).mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                    if (Navigator.of(dialogContext).mounted) { // Use dialogContext
+                      ScaffoldMessenger.of(dialogContext).showSnackBar( // Use dialogContext
                         SnackBar(content: Text('Failed to update progress: ${e.toString().replaceFirst('Exception: ', '')}'), backgroundColor: Colors.red),
                       );
                     }
                   }
                 } else {
                   // Check if the dialog context is still valid before showing SnackBar
-                  if (Navigator.of(context).mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                  if (Navigator.of(dialogContext).mounted) { // Use dialogContext
+                    ScaffoldMessenger.of(dialogContext).showSnackBar( // Use dialogContext
                       const SnackBar(content: Text('Please enter valid page and status.'), backgroundColor: Colors.red),
                     );
                   }

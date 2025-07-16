@@ -16,11 +16,10 @@ class CollectionScreen extends StatefulWidget {
   State<CollectionScreen> createState() => _CollectionScreenState();
 }
 
-// String extension for capitalize
-extension StringCasingExtension on String {
+extension StringExtension on String {
   String capitalize() {
     if (isEmpty) return this;
-    return this[0].toUpperCase() + substring(1);
+    return '${this[0].toUpperCase()}${substring(1)}';
   }
 }
 
@@ -55,9 +54,11 @@ class _CollectionScreenState extends State<CollectionScreen> {
         SnackBar(content: Text('Error loading data: ${e.toString()}')),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) { // Check mounted before calling setState
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -88,14 +89,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
           'My Collection',
           style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu_book, color: AppColors.white), // Icon for collection
-            onPressed: () {
-              // Optional: Add functionality for this icon if needed
-            },
-          ),
-        ],
+        // Removed actions IconButton
         elevation: 0,
       ),
       body: RefreshIndicator(

@@ -8,6 +8,7 @@ import '../../services/supabase_service.dart';
 import '../../widgets/bottom_nav_bar.dart';
 import '../../utils/app_router.dart';
 import '../auth/login_screen.dart'; // To access CurrentUser
+import '../auth/welcome_screen.dart'; // For logout navigation
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -45,9 +46,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SnackBar(content: Text('Error loading profile: ${e.toString()}')),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) { // Check mounted before calling setState
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -55,19 +58,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return _readingProgress.where((rp) => rp.status == ReadingStatus.completed).length;
   }
 
+  Future<void> _logout() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      // Clear user state in the provider
+      Provider.of<CurrentUser>(context, listen: false).setUser(null);
+      // Navigate to the welcome screen and remove all previous routes
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+        (Route<dynamic> route) => false,
+      );
+    } catch (e) {
+      print('Logout error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error logging out: ${e.toString()}')),
+      );
+    } finally {
+      if (mounted) { // Check mounted before calling setState
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.primaryBlue,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+        // Removed leading IconButton
         title: const Text(
           'Profile',
           style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: AppColors.white),
+            onPressed: _logout,
+          ),
+        ],
         elevation: 0,
       ),
       body: RefreshIndicator(

@@ -10,7 +10,7 @@ import '../screens/wishlist/wishlist_screen.dart';
 import '../screens/collection/collection_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/review/review_screen.dart';
-import '../models/book.dart'; // Import the Book model for passing to BookDetailScreen
+import '../models/book.dart'; // Import Ebook model for arguments
 
 class AppRouter {
   static const String welcomeRoute = '/';
@@ -35,15 +35,25 @@ class AppRouter {
       case homeRoute:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case bookDetailRoute:
-        final args = settings.arguments as Ebook;
-        return MaterialPageRoute(builder: (_) => BookDetailScreen(ebook: args));
+        // Ensure arguments are of the correct type
+        final args = settings.arguments;
+        if (args is Ebook) {
+          return MaterialPageRoute(builder: (_) => BookDetailScreen(ebook: args));
+        }
+        // Fallback for incorrect argument type
+        return MaterialPageRoute(builder: (_) => const Text('Error: Invalid book arguments'));
       case searchResultsRoute:
-        final args = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(
-            builder: (_) => SearchResultsScreen(
-                  genre: args['genre'],
-                  initialQuery: args['query'],
-                ));
+        // Ensure arguments are of the correct type
+        final args = settings.arguments;
+        if (args is Map<String, dynamic>) {
+          return MaterialPageRoute(
+              builder: (_) => SearchResultsScreen(
+                    genre: args['genre'] as String?,
+                    initialQuery: args['query'] as String?,
+                  ));
+        }
+        // Fallback for incorrect argument type or no arguments
+        return MaterialPageRoute(builder: (_) => const SearchResultsScreen());
       case wishlistRoute:
         return MaterialPageRoute(builder: (_) => const WishlistScreen());
       case collectionRoute:
@@ -51,10 +61,16 @@ class AppRouter {
       case profileRoute:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
       case reviewRoute:
-        final args = settings.arguments as Ebook;
-        return MaterialPageRoute(builder: (_) => ReviewScreen(ebook: args));
+        // Ensure arguments are of the correct type
+        final args = settings.arguments;
+        if (args is Ebook) {
+          return MaterialPageRoute(builder: (_) => ReviewScreen(ebook: args));
+        }
+        // Fallback for incorrect argument type
+        return MaterialPageRoute(builder: (_) => const Text('Error: Invalid review arguments'));
       default:
-        return MaterialPageRoute(builder: (_) => const Text('Error: Unknown route'));
+        // This case handles any undefined routes
+        return MaterialPageRoute(builder: (_) => Text('Error: Unknown route ${settings.name}'));
     }
   }
 }

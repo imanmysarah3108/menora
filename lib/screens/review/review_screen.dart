@@ -6,8 +6,7 @@ import '../../models/book.dart';
 import '../../services/supabase_service.dart';
 import '../../widgets/rating_stars.dart';
 import '../auth/login_screen.dart'; // To access CurrentUser
-import '../../utils/app_router.dart'; // For navigation
-
+import '../../utils/app_router.dart';
 class ReviewScreen extends StatefulWidget {
   final Ebook ebook;
 
@@ -56,9 +55,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
     } catch (e) {
       _showSnackBar('Failed to submit review: ${e.toString().replaceFirst('Exception: ', '')}', Colors.red);
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) { // Check mounted before calling setState
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

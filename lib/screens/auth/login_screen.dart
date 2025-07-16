@@ -56,9 +56,11 @@ class _LoginScreenState extends State<LoginScreen> {
       } catch (e) {
         _showSnackBar(e.toString().replaceFirst('Exception: ', ''), Colors.red);
       } finally {
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) { // Check mounted before calling setState
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }

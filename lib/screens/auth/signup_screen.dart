@@ -17,9 +17,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController(); // Assuming username is name
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
@@ -35,7 +33,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           name: _nameController.text,
           email: _emailController.text,
           password: _passwordController.text,
-          phoneNumber: _phoneController.text.isNotEmpty ? _phoneController.text : null,
         );
 
         // After successful signup, automatically log in the user (optional, but convenient)
@@ -46,9 +43,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       } catch (e) {
         _showSnackBar(e.toString().replaceFirst('Exception: ', ''), Colors.red);
       } finally {
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) { // Check mounted before calling setState
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -65,9 +64,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   void dispose() {
     _nameController.dispose();
-    _phoneController.dispose();
     _emailController.dispose();
-    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -120,18 +117,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     const SizedBox(height: 20),
                     CustomTextField(
-                      hintText: 'No Phone',
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty && !RegExp(r'^\+?[0-9]{7,15}$').hasMatch(value)) {
-                          return 'Enter a valid phone number';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    CustomTextField(
                       hintText: 'Email',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -141,17 +126,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         }
                         if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                           return 'Please enter a valid email';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    CustomTextField(
-                      hintText: 'Username', // Assuming username maps to name or is a separate field
-                      controller: _usernameController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a username';
                         }
                         return null;
                       },

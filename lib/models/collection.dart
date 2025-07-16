@@ -1,6 +1,5 @@
 // lib/models/collection.dart
 import 'book.dart';
-
 class Collection {
   final String id;
   final String userId;

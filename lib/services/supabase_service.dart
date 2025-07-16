@@ -54,7 +54,6 @@ class SupabaseService {
     required String name,
     required String email,
     required String password,
-    String? phoneNumber,
   }) async {
     try {
       final userId = _uuid.v4(); // Generate a new UUID for the user

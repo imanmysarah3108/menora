@@ -6,20 +6,19 @@ import '../../models/wishlist.dart';
 import '../../services/supabase_service.dart';
 import '../../widgets/bottom_nav_bar.dart';
 import '../auth/login_screen.dart'; // To access CurrentUser
-import '../../utils/app_router.dart'; // For navigation
-
-extension StringCasingExtension on String {
-  String capitalize() {
-    if (isEmpty) return this;
-    return '${this[0].toUpperCase()}${substring(1)}';
-  }
-}
-
+import '../../utils/app_router.dart';
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
 
   @override
   State<WishlistScreen> createState() => _WishlistScreenState();
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    if (isEmpty) return this;
+    return '${this[0].toUpperCase()}${substring(1)}';
+  }
 }
 
 class _WishlistScreenState extends State<WishlistScreen> {
@@ -51,9 +50,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
         SnackBar(content: Text('Error loading wishlist: ${e.toString()}')),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) { // Check mounted before calling setState
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -82,22 +83,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.primaryBlue,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+        // Removed leading IconButton
         title: const Text(
           'My Wishlist',
           style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite, color: AppColors.white), // Heart icon as per UI
-            onPressed: () {
-              // Optional: Add functionality for this icon if needed
-            },
-          ),
-        ],
+        // Removed actions IconButton
         elevation: 0,
       ),
       body: RefreshIndicator(

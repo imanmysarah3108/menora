@@ -8,7 +8,9 @@ import '../../services/supabase_service.dart';
 import '../../models/book.dart';
 import '../auth/login_screen.dart'; // To access CurrentUser
 import '../../widgets/custom_button.dart'; // For "add to wishlist now" button
-import '../../widgets/custom_text_field.dart'; // For search input
+import '../../widgets/custom_text_field.dart'; // For search input field
+import '../../widgets/bottom_nav_bar.dart'; // For bottom navigation bar
+
 class SearchResultsScreen extends StatefulWidget {
   final String? genre;
   final String? initialQuery;
@@ -30,44 +32,67 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   @override
   void initState() {
     super.initState();
+    debugPrint('SearchResultsScreen: initState called.');
     _searchController.text = widget.initialQuery ?? '';
     _currentSearchTerm = widget.initialQuery;
     _currentGenre = widget.genre;
+
     _userId = Provider.of<CurrentUser>(context, listen: false).user?.id;
+    debugPrint('SearchResultsScreen: userId in initState: $_userId');
+
     if (_userId == null) {
-      Navigator.pushReplacementNamed(context, AppRouter.loginRoute);
-      return;
+      debugPrint('SearchResultsScreen: userId is null. Scheduling navigation to login.');
+      // Schedule navigation after the current frame is built
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) { // Ensure widget is still mounted before navigating
+          Navigator.pushReplacementNamed(context, AppRouter.loginRoute);
+        }
+      });
+    } else {
+      // Only perform search if a user is logged in
+      _performSearch();
     }
-    _performSearch();
   }
 
   Future<void> _performSearch() async {
+    debugPrint('SearchResultsScreen: _performSearch called.');
     setState(() {
       _isLoading = true;
     });
+    debugPrint('SearchResultsScreen: _isLoading set to true.');
 
     try {
       final supabaseService = Provider.of<SupabaseService>(context, listen: false);
       if (_currentGenre != null && _currentGenre!.isNotEmpty) {
+        debugPrint('SearchResultsScreen: Searching by genre: $_currentGenre');
         _searchResults = await supabaseService.searchEbooksByGenre(_currentGenre!);
       } else if (_currentSearchTerm != null && _currentSearchTerm!.isNotEmpty) {
+        debugPrint('SearchResultsScreen: Searching by title: $_currentSearchTerm');
         _searchResults = await supabaseService.searchEbooksByTitle(_currentSearchTerm!);
       } else {
+        debugPrint('SearchResultsScreen: No search term or genre, clearing results.');
         _searchResults = []; // No search term or genre, show empty results
       }
+      debugPrint('SearchResultsScreen: Search results count: ${_searchResults.length}');
     } catch (e) {
-      print('Error performing search: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error searching: ${e.toString()}')),
-      );
+      debugPrint('SearchResultsScreen: Error performing search: $e');
+      if (mounted) { // Check mounted before showing SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error searching: ${e.toString()}')),
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) { // Check mounted before calling setState in finally block
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      debugPrint('SearchResultsScreen: _isLoading set to false.');
     }
   }
 
   void _onSearchSubmitted(String query) {
+    debugPrint('SearchResultsScreen: _onSearchSubmitted called with query: $query');
     setState(() {
       _currentSearchTerm = query;
       _currentGenre = null; // Clear genre when performing text search
@@ -76,7 +101,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   }
 
   Future<void> _addBookToWishlist() async {
-    if (_userId == null) return;
+    debugPrint('SearchResultsScreen: _addBookToWishlist called.');
+    if (_userId == null) {
+      debugPrint('SearchResultsScreen: userId is null, cannot add to wishlist.');
+      return;
+    }
 
     // Prompt user for book title and author
     String? bookTitle;
@@ -138,8 +167,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           bookAuthor: bookAuthor,
         );
         _showSnackBar('Book added to wishlist!', Colors.green);
+        debugPrint('SearchResultsScreen: Book added to wishlist successfully.');
       } catch (e) {
         _showSnackBar('Failed to add to wishlist: ${e.toString().replaceFirst('Exception: ', '')}', Colors.red);
+        debugPrint('SearchResultsScreen: Failed to add to wishlist: $e');
       }
     }
   }
@@ -157,81 +188,95 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    debugPrint('SearchResultsScreen: dispose called.');
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('SearchResultsScreen: build called. _isLoading: $_isLoading, _searchResults.isEmpty: ${_searchResults.isEmpty}');
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.primaryBlue,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text(
-          'Search Results',
+          'Search Books',
           style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
         elevation: 0,
-        toolbarHeight: 0, // Hide default app bar
       ),
       body: Column(
         children: [
-          // Top blue search bar area
-          Container(
+          Padding(
             padding: const EdgeInsets.all(16.0),
-            decoration: const BoxDecoration(
-              color: AppColors.primaryBlue,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
-              ),
-            ),
-            child: Column(
-              children: [
-                const SizedBox(height: 10),
-                TextField(
-                  controller: _searchController,
-                  onSubmitted: _onSearchSubmitted,
-                  decoration: InputDecoration(
-                    hintText: 'Search',
-                    hintStyle: const TextStyle(color: AppColors.white),
-                    prefixIcon: const Icon(Icons.search, color: AppColors.white),
-                    filled: true,
-                    fillColor: AppColors.darkBlue.withOpacity(0.5),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                  ),
-                  style: const TextStyle(color: AppColors.white),
-                ),
-                if (_currentGenre != null && _currentGenre!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Chip(
-                        label: Text('Genre: $_currentGenre'),
-                        backgroundColor: AppColors.lightBlue,
-                        labelStyle: const TextStyle(color: AppColors.darkBlue),
-                        deleteIcon: const Icon(Icons.close, size: 18),
-                        onDeleted: () {
+            child: TextField(
+              controller: _searchController,
+              onSubmitted: _onSearchSubmitted,
+              decoration: InputDecoration(
+                hintText: 'Search by title',
+                hintStyle: const TextStyle(color: AppColors.greyText),
+                prefixIcon: const Icon(Icons.search, color: AppColors.greyText),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: AppColors.greyText),
+                        onPressed: () {
+                          _searchController.clear();
                           setState(() {
-                            _currentGenre = null;
-                            _searchController.clear();
-                            _searchResults = []; // Clear results when genre is cleared
+                            _currentSearchTerm = null;
+                            _searchResults = [];
                           });
+                          debugPrint('SearchResultsScreen: Search field cleared.');
                         },
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 10),
+                      )
+                    : null,
+                filled: true,
+                fillColor: AppColors.lightGrey,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              ),
+              style: const TextStyle(color: AppColors.black),
+            ),
+          ),
+          // Genre Filters
+          SizedBox(
+            height: 40,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              children: [
+                _buildGenreChip('Popular'),
+                _buildGenreChip('Horror'),
+                _buildGenreChip('Romance'),
+                _buildGenreChip('Fantasy'),
+                _buildGenreChip('Science Fiction'),
+                _buildGenreChip('Thriller'),
               ],
             ),
           ),
+          if (_currentGenre != null && _currentGenre!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 10.0, left: 16.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Chip(
+                  label: Text('Genre: $_currentGenre'),
+                  backgroundColor: AppColors.lightBlue,
+                  labelStyle: const TextStyle(color: AppColors.darkBlue),
+                  deleteIcon: const Icon(Icons.close, size: 18),
+                  onDeleted: () {
+                    setState(() {
+                      _currentGenre = null;
+                      _searchController.clear();
+                      _searchResults = []; // Clear results when genre is cleared
+                    });
+                    debugPrint('SearchResultsScreen: Genre chip deleted.');
+                  },
+                ),
+              ),
+            ),
+          const SizedBox(height: 10),
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -241,12 +286,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text(
-                              'Book not found',
+                              'No books found. Try a different search or add to wishlist.',
                               style: TextStyle(fontSize: 18, color: AppColors.greyText),
+                              textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 20),
                             CustomButton(
-                              text: 'add to wishlist now',
+                              text: 'Add to Wishlist Now',
                               onPressed: _addBookToWishlist,
                             ),
                           ],
@@ -266,13 +312,37 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                                 arguments: ebook,
                               );
                             },
-                            showProgress: true, // Assuming search results might show progress
-                            statusText: 'Complete', // Placeholder, ideally fetched from reading_progress
+                            showProgress: false, // Search results don't necessarily show progress
                           );
                         },
                       ),
           ),
         ],
+      ),
+      bottomNavigationBar: const BottomNavBar(currentIndex: 1), // Set to 1 for Search tab
+    );
+  }
+
+  Widget _buildGenreChip(String genre) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: ActionChip(
+        label: Text(genre),
+        backgroundColor: AppColors.lightBlue,
+        labelStyle: const TextStyle(color: AppColors.darkBlue),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide.none,
+        ),
+        onPressed: () {
+          setState(() {
+            _currentGenre = genre;
+            _currentSearchTerm = null; // Clear search term when genre is selected
+            _searchController.clear();
+          });
+          _performSearch();
+          debugPrint('SearchResultsScreen: Genre chip pressed: $genre');
+        },
       ),
     );
   }
